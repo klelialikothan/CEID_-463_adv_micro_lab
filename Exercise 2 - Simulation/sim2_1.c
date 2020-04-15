@@ -23,16 +23,16 @@ void loop(){
   if (Serial.available()){                // if serial input is available
     input=Serial.read();                  // read char from keyboard input
     if (input=='u'){                      // increase ratio
-      if ((off_cycles-1)>=0){            // off_cycles>=0 
-        off_cycles-=1;                   // adjust for next cycle
+      if ((off_cycles-1)>=0){             // off_cycles>=0 
+        off_cycles-=1;                    // adjust for next cycle
       }
       else {
         off_cycles=0;                     // retain peak brightness
       }
     }
     else if(input=='d'){                  // decrease ratio
-      if ((off_cycles+1)<=100){          // off_cycles<=100
-        off_cycles+=1;                   // adjust for next cycle
+      if ((off_cycles+1)<=100){           // off_cycles<=100
+        off_cycles+=1;                    // adjust for next cycle
       }
       else {
         off_cycles=100;                   // remain at 0% brightness
