@@ -18,6 +18,7 @@ PIO *pioa = NULL;
 AIC *aic = NULL;
 
 unsigned int button_state = BUT_IDLE;               // button initially idle
+bool push_button=false;
 
 int main (int argc, const char*argv[] ) {
     unsigned int gen;
@@ -36,7 +37,6 @@ int main (int argc, const char*argv[] ) {
     int cycles=1;
     int off_cycles=0;
     int times=1;
-    bool push_button=false;
     bool change_levels=true;
     char tmp;
 

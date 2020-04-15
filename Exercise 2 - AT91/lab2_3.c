@@ -18,6 +18,9 @@ PIO *pioa = NULL;
 AIC *aic = NULL;
 
 unsigned int button_state = BUT_IDLE;               // button initially idle
+int off_cycles=0;
+bool first_press_button=false;
+bool count_guess=false;
 
 int main (int argc, const char*argv[] ) {
     unsigned int gen;
@@ -34,12 +37,9 @@ int main (int argc, const char*argv[] ) {
     pioa->IER   = 0x80;                             // line 7: interrupts enabled
 
     int cycles=0;
-    int off_cycles=0;
     int times=0;
     int total_times=21;
-    bool first_press_button=false;
     int misses=0;
-    bool count_guess=false;
     int correct_guesses=0;
     char tmp;
 
