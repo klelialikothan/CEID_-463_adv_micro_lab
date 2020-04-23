@@ -28,6 +28,8 @@ int tens = 0;
 int ones = 0;
 int cycles = 0;
 int counted_tens = 0;
+int elaplsed_cycles = 0;
+bool count_elapsed = false;
 
 int main (int argc, const char*argv[] ) {
 
@@ -81,6 +83,7 @@ void FIQ_handler(void) {
         if (!(data_in & 0x01)) {                        // button pressed
             if(button_state == BUT_IDLE) {      
                 button_state = BUT_PRESSED;             // change button state
+                count_elapsed = true;                   // start counting cycles
                 if (ops_state == OPS){                  // if IDLE mode         
                     ops_state = OPS_HOLD;               // change operation state
                     counted_tens = 0;                   // reset counted tens
@@ -94,6 +97,16 @@ void FIQ_handler(void) {
         else {
             if (button_state == BUT_PRESSED) {          // button released
                 button_state = BUT_IDLE;                // change button state
+                count_elapsed = false;                  // stop counting cycles
+                if (elaplsed_cycles>=4){                // reset           
+                  // reset variables
+                  tens = 0;
+                  ones = 0;
+                  cycles = 0;
+                  counted_tens = 0;
+                  tc->Channel_0.CCR = 0x05;             // reset timer (count 0.25s)
+                }
+                elaplsed_cycles = 0;
             }
         }
     }
@@ -151,39 +164,6 @@ void FIQ_handler(void) {
                     break;
             }   
 
-            // if (cycles % 2 == 0)                 // when 0.5s have passed
-            //  // led 1 (line 13) blinks once every second
-            //  data_out = pioa->ODSR;                  // read output value
-            //  pioa->SODR = data_out | 0x2000;         // line 13 flip
-            //  pioa->CODR = data_out & 0x2000;         // line 13 flip
-            //  // led 0 (line 14) blinks every time tens changes
-            //  if (counted_tens < tens){
-            //      pioa->SODR = data_out | 0x4000;     // line 14 flip
-            //      pioa->CODR = data_out & 0x4000;     // line 14 flip
-            //      if (cycles == 3){                   // 1s has passed
-            //          counted_tens++;
-            //      }
-            //  }
-            // if (cycles == 3){                        // 1s has passed
-            //  if (ones == 9){                     // need to change tens digit
-            //      ones = 0;                       // reset ones to 0
-            //      if ((tens+1) <= 5){             // less than 60s have been counted
-            //          tens++;                     // increment tens
-            //      }
-            //      else {                          // exactly 60s have been counted
-            //          tens = 0;                   // reset tens to 0
-            //      }
-            //      counted_tens = 0;               // reset
-            //  }
-            //  else {
-            //      ones++;                         // increment ones
-            //  }
-            //  cycles = 0;                         // reset counter
-            // }
-            // else {
-            //  cycles++;                           // increment counter
-            // }
-            // tc->Channel_0.CCR = 0x05;                // reset timer (0.5s)
         }
         // HOLD mode
         else {
@@ -209,7 +189,9 @@ void FIQ_handler(void) {
             else {
                 cycles++;                               // increment counter
             }
-            // tc->Channel_0.CCR = 0x05;                // reset timer (0.5s)
+        }
+        if (count_elapsed){                             // button has been pressed for 0.25s
+            elaplsed_cycles += 1;
         }
         tc->Channel_0.CCR = 0x05;                       // reset timer (count 0.25s)
     }   

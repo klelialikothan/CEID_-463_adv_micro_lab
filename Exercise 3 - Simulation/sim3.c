@@ -26,6 +26,8 @@ int tens;
 int ones;
 int cycles;
 int counted_tens;
+int elaplsed_cycles;
+bool count_elapsed;
 
 void setup(){
   pinMode(2,INPUT_PULLUP);    // ODR, PUER
@@ -43,6 +45,8 @@ void setup(){
   ones = 0;
   cycles = 0;
   counted_tens = 0;
+  elaplsed_cycles = 0;
+  count_elapsed = false;
   
   clk_pulse_counter=0;
   Channel_0_CCR = continue_count;
@@ -85,6 +89,7 @@ void FIQ_handler(){
     PIOA_int = LOW;
     if(button_state == BUT_IDLE){    
       button_state = BUT_PRESSED;                   // change button state
+      count_elapsed = true;                         // start counting cycles
       if (ops_state == OPS){                        // if IDLE mode     
         ops_state = OPS_HOLD;                       // change operation state
         counted_tens = 0;                           // reset counted tens
@@ -99,6 +104,16 @@ void FIQ_handler(){
     else {
       if (button_state == BUT_PRESSED){             // button released
         button_state = BUT_IDLE;                    // change button state
+        count_elapsed = false;                      // stop counting cycles
+        if (elaplsed_cycles>=4){                    // reset           
+          // reset variables
+          tens = 0;
+          ones = 0;
+          cycles = 0;
+          counted_tens = 0;
+          Channel_0_CCR = 0x05;                     // reset timer (0.25s)
+        }
+        elaplsed_cycles = 0;
       }
     }
   }
@@ -155,40 +170,6 @@ void FIQ_handler(){
           break;
       }
 
-      // if ((cycles % 2) != 0){                     // when 0.5s have passed
-      // // led 1 (line 13) blinks every second
-      //   led = digitalRead(3);                     // read output value
-      //   digitalWrite(3, !led);                    // line 13 flip
-      //   if (counted_tens < tens){
-      //     led = digitalRead(4);                   // read output value
-      //     digitalWrite(4, !led);                  // line 14 flip
-      //     if (cycles == 3){                       // 1s has passed
-      //       counted_tens++;
-      //     }
-      //   }
-      // }
-      // if (cycles == 3){                           // 1s has passed
-      //   if (ones == 9){                           // need to change tens digit
-      //     ones = 0;                               // reset ones to 0
-      //     if ((tens + 1) <= 5){                   // less than 60s have been counted
-      //       tens++;                               // increment tens
-      //     }
-      //     else {                                  // exactly 60s have been counted
-      //       tens = 0;                             // reset tens to 0
-      //     }
-      //     counted_tens = 0;                       // reset
-      //   }
-      //   else {
-      //     ones++;                                 // increment ones
-      //   }
-      //   cycles = 0;                               // reset counter
-      //   Serial.print(tens, DEC);
-      //   Serial.println(ones, DEC);
-      // }
-      // else {
-      //   cycles++;                                 // increment counter
-      // }
-      // Channel_0_CCR = 0x05;                       // reset timer (0.5s)
     }
     // HOLD mode
     else {
@@ -213,6 +194,9 @@ void FIQ_handler(){
       else {
         cycles++;                                   // increment counter
       }
+    }
+    if (count_elapsed){                             // button has been pressed for 0.25s
+      elaplsed_cycles += 1;
     }
     Channel_0_CCR = 0x05;                           // reset timer (0.25s)
   }
