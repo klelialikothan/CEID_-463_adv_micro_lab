@@ -83,6 +83,7 @@ void FIQ_handler(void) {
                 button_state = BUT_PRESSED;             // change button state
                 if (ops_state == OPS){                  // if IDLE mode         
                     ops_state = OPS_HOLD;               // change operation state
+                    counted_tens = 0;                   // reset counted tens
                 }
                 else {                                  // if HOLD mode
                     ops_state = OPS;                    // change operation state

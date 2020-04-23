@@ -87,6 +87,7 @@ void FIQ_handler(){
       button_state = BUT_PRESSED;                   // change button state
       if (ops_state == OPS){                        // if IDLE mode     
         ops_state = OPS_HOLD;                       // change operation state
+        counted_tens = 0;                           // reset counted tens
       }
       else {                                        // if HOLD mode
         ops_state = OPS;                            // change operation state
@@ -213,6 +214,6 @@ void FIQ_handler(){
         cycles++;                                   // increment counter
       }
     }
-    Channel_0_CCR = 0x05;                         // reset timer (0.25s)
+    Channel_0_CCR = 0x05;                           // reset timer (0.25s)
   }
 }
